@@ -89,11 +89,8 @@ func (p Panel) Clear() {
 	}
 }
 
-func (p Panel) FillAll(bgColor tcell.Color) {
-	c := Char{
-		R:     ' ',
-		Style: tcell.StyleDefault.Background(bgColor),
-	}
+func (p Panel) FillAll(s tcell.Style) {
+	c := Char{R: ' ', Style: s}
 	p.Fill(0, 0, p.width, p.height, &c)
 }
 

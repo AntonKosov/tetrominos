@@ -4,8 +4,6 @@ import (
 	"strings"
 	"tetrominos/input"
 	"tetrominos/view/ui"
-
-	"github.com/gdamore/tcell/v2"
 )
 
 type controlHints struct {
@@ -20,14 +18,9 @@ func newControlHints(canvas *ui.Canvas) controlHints {
 }
 
 func (c controlHints) output(hints []input.KeyDescription) {
-	captionStyle := tcell.StyleDefault.
-		Background(tcell.ColorBlack).
-		Foreground(tcell.ColorWhiteSmoke).
-		Bold(true)
+	captionStyle := createFontStyle(backgroundColor, textColor).Bold(true)
 	c.panel.OutputStr(0, 0, "Controls:", captionStyle)
-	hintStyle := tcell.StyleDefault.
-		Background(tcell.ColorBlack).
-		Foreground(tcell.ColorWhiteSmoke)
+	hintStyle := createFontStyle(backgroundColor, textColor)
 	longestKeyName := 0
 	for _, kd := range hints {
 		l := len(kd.Key)

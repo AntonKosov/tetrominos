@@ -60,39 +60,16 @@ var scoreStyle tcell.Style
 var tetrimonoStyle map[tetrominos.TetrominoType]ui.Char
 
 func init() {
-	scoreStyle = tcell.StyleDefault.
-		Background(tcell.ColorBlack).
-		Foreground(tcell.ColorWhite).Bold(true)
+	scoreStyle = createFontStyle(backgroundColor, textColor).Bold(true)
 	const r = ' '
 	tetrimonoStyle = map[tetrominos.TetrominoType]ui.Char{
-		tetrominos.TetrominoI: {
-			R:     r,
-			Style: tcell.StyleDefault.Background(tcell.ColorRed),
-		},
-		tetrominos.TetrominoJ: {
-			R:     r,
-			Style: tcell.StyleDefault.Background(tcell.ColorBlue),
-		},
-		tetrominos.TetrominoL: {
-			R:     r,
-			Style: tcell.StyleDefault.Background(tcell.ColorOrange),
-		},
-		tetrominos.TetrominoO: {
-			R:     r,
-			Style: tcell.StyleDefault.Background(tcell.ColorYellow),
-		},
-		tetrominos.TetrominoS: {
-			R:     r,
-			Style: tcell.StyleDefault.Background(tcell.ColorDarkMagenta),
-		},
-		tetrominos.TetrominoT: {
-			R:     r,
-			Style: tcell.StyleDefault.Background(tcell.ColorLightCyan),
-		},
-		tetrominos.TetrominoZ: {
-			R:     r,
-			Style: tcell.StyleDefault.Background(tcell.ColorGreen),
-		},
+		tetrominos.TetrominoI: {R: r, Style: createBGStyle(tetrominoIColor)},
+		tetrominos.TetrominoJ: {R: r, Style: createBGStyle(tetrominoJColor)},
+		tetrominos.TetrominoL: {R: r, Style: createBGStyle(tetrominoLColor)},
+		tetrominos.TetrominoO: {R: r, Style: createBGStyle(tetrominoOColor)},
+		tetrominos.TetrominoS: {R: r, Style: createBGStyle(tetrominoSColor)},
+		tetrominos.TetrominoT: {R: r, Style: createBGStyle(tetrominoTColor)},
+		tetrominos.TetrominoZ: {R: r, Style: createBGStyle(tetrominoZColor)},
 	}
 }
 
@@ -201,7 +178,7 @@ func drawContainer(canvas *ui.Canvas) {
 	container := canvas.CreatePanel(nil, x, 0, width, height, 0)
 	wallChar := &ui.Char{
 		R:     ' ',
-		Style: tcell.StyleDefault.Background(tcell.ColorWhite),
+		Style: createBGStyle(wallColor),
 	}
 	container.Fill(0, 0, 2, height, wallChar)
 	container.Fill(width-2, 0, 2, height, wallChar)

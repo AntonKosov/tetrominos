@@ -31,7 +31,7 @@ func New() (*Factory, error) {
 		return nil, fmt.Errorf("the screen size must be at least %dx%d (WxH)", screenWidth, screenHeight)
 	}
 
-	bgStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
+	bgStyle := createFontStyle(backgroundColor, textColor)
 	s.SetStyle(bgStyle)
 
 	canvas := ui.NewCanvas(s, (w-screenWidth)/2, (h-screenHeight)/2, screenWidth, screenHeight, layers, bgStyle)

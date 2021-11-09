@@ -4,8 +4,6 @@ import (
 	"tetrominos/input"
 	"tetrominos/view/fonts"
 	"tetrominos/view/ui"
-
-	"github.com/gdamore/tcell/v2"
 )
 
 type pause struct {
@@ -31,9 +29,7 @@ func newPause(canvas *ui.Canvas) pause {
 }
 
 func (v pause) Activate() {
-	s := tcell.StyleDefault.
-		Background(tcell.ColorDarkRed).
-		Foreground(tcell.ColorWhite).Bold(true).Blink(true)
+	s := createFontStyle(messageBoxColor, textColor).Bold(true).Blink(true)
 	v.panel.OutputStrings(0, 0, v.text, s)
 }
 

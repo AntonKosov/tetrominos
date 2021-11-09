@@ -4,8 +4,6 @@ import (
 	"tetrominos/input"
 	"tetrominos/view/fonts"
 	"tetrominos/view/ui"
-
-	"github.com/gdamore/tcell/v2"
 )
 
 type Start struct {
@@ -31,9 +29,7 @@ func newStart(canvas *ui.Canvas) Start {
 }
 
 func (s Start) Activate() {
-	style := tcell.StyleDefault.
-		Background(tcell.ColorDarkRed).
-		Foreground(tcell.ColorWhite).Bold(true)
+	style := createFontStyle(messageBoxColor, textColor).Bold(true)
 	s.panel.OutputAllignedStrings(
 		s.name, ui.HCenterAlligment, ui.VCenterAlligment, style,
 	)

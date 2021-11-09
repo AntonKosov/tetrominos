@@ -4,8 +4,6 @@ import (
 	"tetrominos/input"
 	"tetrominos/view/fonts"
 	"tetrominos/view/ui"
-
-	"github.com/gdamore/tcell/v2"
 )
 
 type gameOver struct {
@@ -28,9 +26,7 @@ func newGameOver(canvas *ui.Canvas) gameOver {
 }
 
 func (g *gameOver) Activate() {
-	bgColor := tcell.ColorDarkRed
-	style := tcell.StyleDefault.Background(bgColor).
-		Foreground(tcell.ColorWhite).Bold(true)
+	style := createFontStyle(messageBoxColor, textColor).Bold(true)
 	g.panel.OutputAllignedStrings(
 		g.gameOverText, ui.HCenterAlligment, ui.TopAlligment, style,
 	)
