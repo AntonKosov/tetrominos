@@ -154,11 +154,12 @@ func (s *gameState) moveDown() bool {
 		return true
 	}
 	removedRows, changedRows := s.field.SetTetromino(s.col, s.row, s.currentTetromino)
-	if removedRows > 0 {
-		s.removedRows += removedRows
-		s.score += gamestate.Score(removedRows)
+	rowsCount := len(removedRows)
+	if rowsCount > 0 {
+		s.removedRows += rowsCount
+		s.score += gamestate.Score(rowsCount)
+		s.params.GameView.RemoveRows(removedRows, changedRows)
 		s.params.GameView.OutputScore(s.score)
-		s.params.GameView.DrawRaws(0, changedRows)
 	}
 	return false
 }

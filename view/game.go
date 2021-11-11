@@ -7,6 +7,7 @@ import (
 	"tetrominos/tetrominos"
 	"tetrominos/view/fonts"
 	"tetrominos/view/ui"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 )
@@ -127,9 +128,16 @@ func (g game) OutputNextTetromino(t tetrominos.Tetromino) {
 	g.canvas.Draw()
 }
 
-func (g game) DrawRaws(startRaw int, fr []tetrominos.FieldRow) {
+func (g game) RemoveRows(raws []int, fr []tetrominos.FieldRow) {
+	for c := 0; c < settings.FieldWidth; c++ {
+		for _, r := range raws {
+			outputCell(c, r, nil, g.tetrominoPanel)
+		}
+		g.canvas.Draw()
+		time.Sleep(time.Millisecond * 25) // TODO #19: it shouldn't be sleep
+	}
 	for i, tr := range fr {
-		g.drawRaw(startRaw+i, tr)
+		g.drawRaw(i, tr)
 	}
 	g.canvas.Draw()
 }

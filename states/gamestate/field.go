@@ -49,8 +49,8 @@ func (f *Field) isFree(column, row int) bool {
 	return f.data[row][column] == nil
 }
 
-// SetTetromino returns the number of removed rows and changed rows
-func (f *Field) SetTetromino(col, row int, tr t.Tetromino) (int, []t.FieldRow) {
+// SetTetromino returns a slice of indeces of removed rows and changed rows
+func (f *Field) SetTetromino(col, row int, tr t.Tetromino) ([]int, []t.FieldRow) {
 	f.bakeTetromino(col, row, tr)
 	bottomRow := row + tr.Size() - 1
 	if bottomRow >= settings.FieldHeight {
@@ -58,7 +58,7 @@ func (f *Field) SetTetromino(col, row int, tr t.Tetromino) (int, []t.FieldRow) {
 	}
 	removedRows, lowestRemovedRow := f.removeFilledRows(row, bottomRow)
 	var changedRows []t.FieldRow
-	if removedRows > 0 {
+	if len(removedRows) > 0 {
 		changedRows = f.data[:lowestRemovedRow+1]
 	}
 	return removedRows, changedRows
@@ -74,10 +74,10 @@ func (f *Field) bakeTetromino(col, row int, t t.Tetromino) {
 	}
 }
 
-// removeFilledRows returns the number of removed rows and the index of the
-// lowest removed row
-func (f *Field) removeFilledRows(topRow, bottomRow int) (int, int) {
-	removedRows := 0
+// removeFilledRows returns a slice of indeces of removed rows and the index of
+// the lowest removed row
+func (f *Field) removeFilledRows(topRow, bottomRow int) ([]int, int) {
+	removedRows := make([]int, 0, 4)
 	lowestRemovedRow := 0
 	for r := topRow; r <= bottomRow; r++ {
 		isFull := true
@@ -90,7 +90,7 @@ func (f *Field) removeFilledRows(topRow, bottomRow int) (int, int) {
 		if !isFull {
 			continue
 		}
-		removedRows++
+		removedRows = append(removedRows, r)
 		lowestRemovedRow = r
 		f.data = append(
 			[]t.FieldRow{createNewRow()},

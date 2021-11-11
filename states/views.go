@@ -15,7 +15,7 @@ type GameView interface {
 	Activate()
 	Deactivate()
 	Draw(c, r int, t tetrominos.Tetromino)
-	DrawRaws(startRow int, tr []tetrominos.FieldRow)
+	RemoveRows(rows []int, tr []tetrominos.FieldRow)
 	Move(oldC, oldR int, oldT tetrominos.Tetromino, newC, newR int, newT tetrominos.Tetromino)
 	OutputScore(s int)
 	OutputLevel(l int)
