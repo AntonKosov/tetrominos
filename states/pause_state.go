@@ -21,7 +21,7 @@ func (s *pauseState) Activate() {
 		[]input.KeyDescription{
 			{
 				Key:         input.EscKey,
-				Description: "Resume game",
+				Description: "Resume",
 			},
 			ctrlCDescription,
 		},

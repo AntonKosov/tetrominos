@@ -23,7 +23,7 @@ func (s *gameOverState) Activate() {
 	s.params.GameOverView.ShowControlHints([]input.KeyDescription{
 		{
 			Key:         input.EscKey,
-			Description: "Start game",
+			Description: "Start",
 		},
 		ctrlCDescription,
 	})

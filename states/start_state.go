@@ -22,7 +22,7 @@ func (s *startState) Activate() {
 		[]input.KeyDescription{
 			{
 				Key:         input.EscKey,
-				Description: "Start game",
+				Description: "Start",
 			},
 			ctrlCDescription,
 		},

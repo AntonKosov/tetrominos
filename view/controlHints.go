@@ -11,7 +11,11 @@ type controlHints struct {
 }
 
 func newControlHints(canvas *ui.Canvas) controlHints {
-	p := canvas.CreatePanel(nil, 0, controlsHintY, sidePanelWidth, controlsHintHeight, 0)
+	const leftMargin = 4
+	p := canvas.CreatePanel(
+		nil, leftMargin, controlsHintY,
+		sidePanelWidth-leftMargin, controlsHintHeight, 0,
+	)
 	return controlHints{
 		panel: p,
 	}
@@ -36,7 +40,7 @@ func (c controlHints) output(hints []input.KeyDescription) {
 		}
 		sb.WriteRune(' ')
 		sb.WriteString(h.Description)
-		c.panel.OutputStr(2, i+1, sb.String(), hintStyle)
+		c.panel.OutputStr(0, i+1, sb.String(), hintStyle)
 	}
 }
 
