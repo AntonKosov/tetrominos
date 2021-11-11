@@ -6,19 +6,19 @@ import (
 	"tetrominos/view/ui"
 )
 
-type Start struct {
+type start struct {
 	canvas *ui.Canvas
 	panel  ui.Panel
 	hints  controlHints
 	name   []string
 }
 
-func newStart(canvas *ui.Canvas) Start {
+func newStart(canvas *ui.Canvas) start {
 	name := fonts.Generate(fonts.Small, " TETROMINOS ")
 	h := len(name)
 	w := len(name[0])
 	p := canvas.CreatePanelInTheCenter(nil, w, h, 2)
-	s := Start{
+	s := start{
 		canvas: canvas,
 		panel:  p,
 		hints:  newControlHints(canvas),
@@ -28,7 +28,7 @@ func newStart(canvas *ui.Canvas) Start {
 	return s
 }
 
-func (s Start) Activate() {
+func (s start) Activate() {
 	style := createFontStyle(messageBoxColor, textColor).Bold(true)
 	s.panel.OutputAllignedStrings(
 		s.name, ui.HCenterAlligment, ui.VCenterAlligment, style,
@@ -36,13 +36,13 @@ func (s Start) Activate() {
 	s.canvas.Draw()
 }
 
-func (s Start) Deactivate() {
+func (s start) Deactivate() {
 	s.panel.Clear()
 	s.hints.clear()
 	s.canvas.Draw()
 }
 
-func (s Start) ShowControlHints(hints []input.KeyDescription) {
+func (s start) ShowControlHints(hints []input.KeyDescription) {
 	s.hints.output(hints)
 	s.canvas.Draw()
 }

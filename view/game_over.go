@@ -25,7 +25,7 @@ func newGameOver(canvas *ui.Canvas) gameOver {
 	return c
 }
 
-func (g *gameOver) Activate() {
+func (g gameOver) Activate() {
 	style := createFontStyle(messageBoxColor, textColor).Bold(true)
 	g.panel.OutputAllignedStrings(
 		g.gameOverText, ui.HCenterAlligment, ui.TopAlligment, style,
@@ -33,13 +33,13 @@ func (g *gameOver) Activate() {
 	g.canvas.Draw()
 }
 
-func (g *gameOver) Deactivate() {
+func (g gameOver) Deactivate() {
 	g.panel.Clear()
 	g.hints.clear()
 	g.canvas.Draw()
 }
 
-func (g *gameOver) ShowControlHints(hints []input.KeyDescription) {
+func (g gameOver) ShowControlHints(hints []input.KeyDescription) {
 	g.hints.output(hints)
 	g.canvas.Draw()
 }

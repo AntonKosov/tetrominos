@@ -73,7 +73,7 @@ func init() {
 	}
 }
 
-func (g *game) Activate() {
+func (g game) Activate() {
 	g.tetrominoPanel.Clear()
 	g.scoreTextPanel.OutputAllignedStrings(
 		g.scoreText, ui.HCenterAlligment, ui.VCenterAlligment, scoreStyle,
@@ -87,23 +87,23 @@ func (g *game) Activate() {
 	g.canvas.Draw()
 }
 
-func (g *game) Deactivate() {
+func (g game) Deactivate() {
 	g.hints.clear()
 	g.canvas.Draw()
 }
 
-func (g *game) Draw(c, r int, t tetrominos.Tetromino) {
+func (g game) Draw(c, r int, t tetrominos.Tetromino) {
 	prepareTetromino(c, r, t, false, g.tetrominoPanel)
 	g.canvas.Draw()
 }
 
-func (g *game) Move(oldC, oldR int, oldT tetrominos.Tetromino, newC, newR int, newT tetrominos.Tetromino) {
+func (g game) Move(oldC, oldR int, oldT tetrominos.Tetromino, newC, newR int, newT tetrominos.Tetromino) {
 	prepareTetromino(oldC, oldR, oldT, true, g.tetrominoPanel)
 	prepareTetromino(newC, newR, newT, false, g.tetrominoPanel)
 	g.canvas.Draw()
 }
 
-func (g *game) OutputLevel(l int) {
+func (g game) OutputLevel(l int) {
 	levelText := fonts.Generate(fonts.Small, fmt.Sprint(l))
 	g.levelPanel.Clear()
 	g.levelPanel.OutputAllignedStrings(
@@ -112,7 +112,7 @@ func (g *game) OutputLevel(l int) {
 	g.canvas.Draw()
 }
 
-func (g *game) OutputScore(s int) {
+func (g game) OutputScore(s int) {
 	scoreText := fonts.Generate(fonts.Small, fmt.Sprint(s))
 	g.scorePanel.Clear()
 	g.scorePanel.OutputAllignedStrings(
@@ -121,25 +121,25 @@ func (g *game) OutputScore(s int) {
 	g.canvas.Draw()
 }
 
-func (g *game) OutputNextTetromino(t tetrominos.Tetromino) {
+func (g game) OutputNextTetromino(t tetrominos.Tetromino) {
 	g.nextTetrominoPanel.Clear()
 	prepareTetromino(0, 0, t, false, g.nextTetrominoPanel)
 	g.canvas.Draw()
 }
 
-func (g *game) DrawRaws(startRaw int, fr []tetrominos.FieldRow) {
+func (g game) DrawRaws(startRaw int, fr []tetrominos.FieldRow) {
 	for i, tr := range fr {
 		g.drawRaw(startRaw+i, tr)
 	}
 	g.canvas.Draw()
 }
 
-func (g *game) ShowControlHints(hints []input.KeyDescription) {
+func (g game) ShowControlHints(hints []input.KeyDescription) {
 	g.hints.output(hints)
 	g.canvas.Draw()
 }
 
-func (g *game) drawRaw(r int, fr tetrominos.FieldRow) {
+func (g game) drawRaw(r int, fr tetrominos.FieldRow) {
 	for c := 0; c < settings.FieldWidth; c++ {
 		var char *ui.Char
 		if fr[c] != nil {

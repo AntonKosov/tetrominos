@@ -10,19 +10,19 @@ import (
 )
 
 func main() {
-	factory, err := view.New()
+	terminal, err := view.Init()
 	if err != nil {
 		log.Fatalln(fmt.Sprintf("Cannot initialize terminal: %v\n", err.Error()))
 	}
-	defer factory.Close()
+	defer terminal.Close()
 
 	rand.Seed(time.Now().UnixMicro())
 
 	views := engine.Views{
-		Start:    factory.CreateStartView(),
-		Game:     factory.CreateGameView(),
-		Pause:    factory.CreatePauseView(),
-		GameOver: factory.CreateGameOverView(),
+		Start:    terminal.StartView,
+		Game:     terminal.GameView,
+		Pause:    terminal.PauseView,
+		GameOver: terminal.GameOverView,
 	}
-	engine.Run(views, factory.Input())
+	engine.Run(views, terminal.Input)
 }
