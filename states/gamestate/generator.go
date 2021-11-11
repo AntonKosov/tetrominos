@@ -10,15 +10,15 @@ type Generator struct {
 }
 
 func (g *Generator) GetNextTetromino() t.Tetromino {
-	// if g.queue == nil {
-	// 	g.queue = shuffle(t.TetrominoI, t.TetrominoI, t.TetrominoI, t.TetrominoI, t.TetrominoI)
-	// }
 	if g.queue == nil {
-		g.queue = shuffle(t.TetrominoI, t.TetrominoJ, t.TetrominoL, t.TetrominoT)
+		firstTetromios := []t.TetrominoType{
+			t.TetrominoI, t.TetrominoJ, t.TetrominoL, t.TetrominoT,
+		}
+		firstTetromino := t.Generate(firstTetromios[rand.Intn(len(firstTetromios))])
+		g.queue = []t.Tetromino{firstTetromino}
 	}
 	nextTetromino := g.queue[0]
 	if len(g.queue) == 1 {
-		// g.queue = shuffle(t.TetrominoI, t.TetrominoI, t.TetrominoI, t.TetrominoI, t.TetrominoI)
 		g.queue = shuffle(
 			t.TetrominoI,
 			t.TetrominoJ,
