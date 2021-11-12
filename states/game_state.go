@@ -157,8 +157,9 @@ func (s *gameState) moveDown() bool {
 	rowsCount := len(removedRows)
 	if rowsCount > 0 {
 		s.removedRows += rowsCount
-		s.score += gamestate.Score(rowsCount)
-		s.params.GameView.RemoveRows(removedRows, changedRows)
+		score := gamestate.Score(rowsCount)
+		s.score += score
+		s.params.GameView.RemoveRows(removedRows, changedRows, score)
 		s.params.GameView.OutputScore(s.score)
 	}
 	return false

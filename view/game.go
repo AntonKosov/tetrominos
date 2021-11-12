@@ -20,6 +20,7 @@ type game struct {
 	levelTextPanel     ui.Panel
 	levelPanel         ui.Panel
 	nextTetrominoPanel ui.Panel
+	earnedScorePanel   ui.Panel
 	hints              controlHints
 	scoreText          []string
 }
@@ -49,6 +50,10 @@ func newGame(canvas *ui.Canvas) game {
 		nextTetrominoPanel: canvas.CreatePanel(
 			nil, screenWidth-sidePanelWidth+(sidePanelWidth-8)/2,
 			screenHeight-6, 8, 4, 0,
+		),
+		earnedScorePanel: canvas.CreatePanel(
+			nil, sidePanelWidth+(settings.FieldWidth+2)*2+1, 0, 2,
+			settings.FieldHeight, 1,
 		),
 		hints:     newControlHints(canvas),
 		scoreText: scoreText,
@@ -128,17 +133,20 @@ func (g game) OutputNextTetromino(t tetrominos.Tetromino) {
 	g.canvas.Draw()
 }
 
-func (g game) RemoveRows(raws []int, fr []tetrominos.FieldRow) {
+func (g game) RemoveRows(raws []int, fr []tetrominos.FieldRow, earnedScore int) {
+	scoreY := raws[0]
+	g.earnedScorePanel.OutputStr(0, scoreY, fmt.Sprintf("+%v", earnedScore), scoreStyle)
 	for c := 0; c < settings.FieldWidth; c++ {
 		for _, r := range raws {
 			outputCell(c, r, nil, g.tetrominoPanel)
 		}
 		g.canvas.Draw()
-		time.Sleep(time.Millisecond * 25) // TODO #19: it shouldn't be sleep
+		time.Sleep(time.Millisecond * 30) // TODO #19: it shouldn't be sleep
 	}
 	for i, tr := range fr {
 		g.drawRaw(i, tr)
 	}
+	g.earnedScorePanel.ClearRow(scoreY)
 	g.canvas.Draw()
 }
 
