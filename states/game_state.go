@@ -120,8 +120,7 @@ func (s *gameState) runControl() {
 				}
 			case <-ticker.C:
 				if !s.isPaused && !s.moveDown() {
-					s.generateNewTetromino()
-					if !s.field.CanBePlaced(s.col, s.row, s.currentTetromino) {
+					if !s.generateNewTetromino() {
 						s.params.ChangeState <- newGameOverState(s.params, s.score)
 						return
 					}
@@ -139,13 +138,17 @@ func (s *gameState) runControl() {
 	}()
 }
 
-func (s *gameState) generateNewTetromino() {
+func (s *gameState) generateNewTetromino() bool {
 	s.currentTetromino = s.nextTetromino
-	s.nextTetromino = s.generator.GetNextTetromino()
-	s.params.GameView.OutputNextTetromino(s.nextTetromino)
 	s.col = (settings.FieldWidth - s.currentTetromino.Size()) / 2
 	s.row = 0
+	if !s.field.CanBePlaced(s.col, s.row, s.currentTetromino) {
+		return false
+	}
+	s.nextTetromino = s.generator.GetNextTetromino()
+	s.params.GameView.OutputNextTetromino(s.nextTetromino)
 	s.params.GameView.Draw(s.col, s.row, s.currentTetromino)
+	return true
 }
 
 func (s *gameState) moveDown() bool {
