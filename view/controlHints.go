@@ -11,7 +11,7 @@ type controlHints struct {
 }
 
 func newControlHints(canvas *ui.Canvas) controlHints {
-	const leftMargin = 4
+	const leftMargin = 3
 	p := canvas.CreatePanel(
 		nil, leftMargin, controlsHintY,
 		sidePanelWidth-leftMargin, controlsHintHeight, 0,

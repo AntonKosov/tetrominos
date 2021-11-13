@@ -9,6 +9,7 @@ const (
 	RightKey = "Right"
 	UpKey    = "Up"
 	DownKey  = "Down"
+	Enter    = "Enter"
 )
 
 type KeyDescription struct {

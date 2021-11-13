@@ -36,6 +36,7 @@ func init() {
 		tcell.KeyLeft:   input.LeftKey,
 		tcell.KeyUp:     input.UpKey,
 		tcell.KeyDown:   input.DownKey,
+		tcell.KeyEnter:  input.Enter,
 	}
 }
 

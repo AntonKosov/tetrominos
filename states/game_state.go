@@ -57,8 +57,8 @@ func newGameState(params Params) *gameState {
 		input.LeftKey:  gs.moveLeft,
 		input.RightKey: gs.moveRight,
 		input.UpKey:    gs.rotateRight,
-		// input.DownKey:  gs.rotateLeft,
-		input.DownKey: gs.drop,
+		input.DownKey:  gs.rotateLeft,
+		input.Enter:    gs.drop,
 	}
 
 	return gs
@@ -108,10 +108,14 @@ func (s *gameState) outputControlsHint() {
 		},
 		{
 			Key:         input.UpKey,
-			Description: "Rotate",
+			Description: "Rotate left",
 		},
 		{
 			Key:         input.DownKey,
+			Description: "Rotate right",
+		},
+		{
+			Key:         input.Enter,
 			Description: "Drop",
 		},
 		ctrlCDescription,
@@ -219,9 +223,9 @@ func (s *gameState) move(dc, dr int, newT t.Tetromino) {
 	s.currentTetromino = &newT
 }
 
-// func (s *gameState) rotateLeft() {
-// 	s.rotate(s.currentTetromino.RotateLeft)
-// }
+func (s *gameState) rotateLeft() {
+	s.rotate(s.currentTetromino.RotateLeft)
+}
 
 func (s *gameState) rotateRight() {
 	s.rotate(s.currentTetromino.RotateRight)

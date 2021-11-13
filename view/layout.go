@@ -9,6 +9,6 @@ const (
 	// the 25th line is the floor
 	screenHeight       = settings.FieldHeight + 1
 	layers             = 3
-	controlsHintY      = settings.FieldHeight - 6
-	controlsHintHeight = 7
+	controlsHintY      = settings.FieldHeight - 7
+	controlsHintHeight = 8
 )
