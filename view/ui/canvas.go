@@ -15,7 +15,9 @@ type Canvas struct {
 	height  int
 }
 
-func NewCanvas(screen tcell.Screen, x, y, width, height int, layers int, bgStyle tcell.Style) *Canvas {
+func NewCanvas(screen tcell.Screen, originX, originY, width, height int,
+	layers int, bgStyle tcell.Style,
+) *Canvas {
 	l := make([]*layer, layers)
 	for i := 0; i < layers; i++ {
 		l[i] = newLayer(width, height)
@@ -23,13 +25,10 @@ func NewCanvas(screen tcell.Screen, x, y, width, height int, layers int, bgStyle
 	c := &Canvas{
 		screen: screen,
 		layers: l,
-		bgChar: Char{
-			R:     ' ',
-			Style: bgStyle,
-		},
+		bgChar: Char{R: ' ', Style: bgStyle},
 
-		originX: x,
-		originY: y,
+		originX: originX,
+		originY: originY,
 		width:   width,
 		height:  height,
 	}
@@ -70,8 +69,32 @@ func (c *Canvas) CreatePanelInTheCenter(parent *Panel, width, height int, layer 
 		layer,
 	)
 }
+
 func (c *Canvas) Draw() {
 	c.screen.Show()
+}
+
+// Sync outputs all characters, it's a very expensive operation. It should be
+// used in events of resizing the terminal window.
+func (c *Canvas) Sync() {
+	c.screen.Clear()
+	for layerIndex, layer := range c.layers {
+		for x := 0; x < len(layer.rep); x++ {
+			col := layer.rep[x]
+			for y := 0; y < len(col); y++ {
+				c.out(x, y, layerIndex, col[y])
+			}
+		}
+	}
+	c.Draw()
+}
+
+// ChangeOrigin changes the origin and syncs the screen. It's a very expensive
+// operation.
+func (c *Canvas) ChangeOrigin(newOriginX, newOriginY int) {
+	c.originX = newOriginX
+	c.originY = newOriginY
+	c.Sync()
 }
 
 func (c *Canvas) out(x, y int, layer int, char *Char) {

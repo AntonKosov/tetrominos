@@ -9,14 +9,16 @@ import (
 
 type inputController struct {
 	screen             tcell.Screen
+	onResize           func()
 	input              chan input.Input
 	terminateWaitGroup sync.WaitGroup
 	terminateInputCh   chan struct{}
 }
 
-func newInputController(screen tcell.Screen) *inputController {
+func newInputController(screen tcell.Screen, onResize func()) *inputController {
 	ic := &inputController{
 		screen:           screen,
+		onResize:         onResize,
 		input:            make(chan input.Input),
 		terminateInputCh: make(chan struct{}),
 	}
@@ -55,10 +57,13 @@ func (c *inputController) runInputHandler() {
 			case <-c.terminateInputCh:
 				return
 			case e := <-eventCh:
-				if eventKey, ok := e.(*tcell.EventKey); ok {
-					if key, ok := keyMapping[eventKey.Key()]; ok {
+				switch e := e.(type) {
+				case *tcell.EventKey:
+					if key, ok := keyMapping[e.Key()]; ok {
 						c.input <- key
 					}
+				case *tcell.EventResize:
+					c.onResize()
 				}
 			}
 		}

@@ -38,12 +38,14 @@ func Init() (*Terminal, error) {
 	bgStyle := createFontStyle(backgroundColor, textColor)
 	screen.SetStyle(bgStyle)
 
+	originX, originY := canvasOrigin(screen)
 	canvas := ui.NewCanvas(
-		screen, (w-screenWidth)/2, (h-screenHeight)/2,
+		screen, originX, originY,
 		screenWidth, screenHeight, layers, bgStyle,
 	)
 
-	ic := newInputController(screen)
+	onResize := func() { canvas.ChangeOrigin(canvasOrigin(screen)) }
+	ic := newInputController(screen, onResize)
 	close := func() {
 		ic.Close()
 		screen.Fini()
@@ -57,4 +59,9 @@ func Init() (*Terminal, error) {
 		Input:        ic.input,
 		Close:        close,
 	}, nil
+}
+
+func canvasOrigin(screen tcell.Screen) (int, int) {
+	w, h := screen.Size()
+	return (w - screenWidth) / 2, (h - screenHeight) / 2
 }
