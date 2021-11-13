@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+const dropSpeed = time.Millisecond * 40
+
 type gameState struct {
 	params      Params
 	field       gamestate.Field
@@ -143,7 +145,7 @@ func (s *gameState) runControl() {
 			case <-s.speedUpSignal:
 				if !speedUp {
 					speedUp = true
-					s.tickerGroup.Reset(tickID, turnDelay()/3)
+					s.tickerGroup.Reset(tickID, dropSpeed)
 				}
 			case <-s.generateNewTetrominoSignal:
 				speedUp = false
