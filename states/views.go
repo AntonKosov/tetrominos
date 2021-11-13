@@ -3,6 +3,7 @@ package states
 import (
 	"tetrominos/input"
 	"tetrominos/tetrominos"
+	"tetrominos/ticker"
 )
 
 type StartView interface {
@@ -12,7 +13,7 @@ type StartView interface {
 }
 
 type GameView interface {
-	Activate()
+	Activate(tickerGroup *ticker.Group)
 	Deactivate()
 	Draw(c, r int, t tetrominos.Tetromino)
 	RemoveRows(rows []int, tr []tetrominos.FieldRow, earnedScore int)

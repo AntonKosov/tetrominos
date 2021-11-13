@@ -3,10 +3,10 @@ package tetrominos
 const f = false
 const t = true
 
-var tetrimonoFactory map[TetrominoType]func() Tetromino
+var tetrominoFactory map[TetrominoType]func() Tetromino
 
 func init() {
-	tetrimonoFactory = map[TetrominoType]func() Tetromino{
+	tetrominoFactory = map[TetrominoType]func() Tetromino{
 		TetrominoI: newTetrominoI,
 		TetrominoJ: newTetrominoJ,
 		TetrominoL: newTetrominoL,
@@ -18,7 +18,7 @@ func init() {
 }
 
 func Generate(t TetrominoType) Tetromino {
-	return tetrimonoFactory[t]()
+	return tetrominoFactory[t]()
 }
 
 func createEmpty(t Tetromino) Tetromino {

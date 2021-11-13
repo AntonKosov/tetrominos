@@ -6,18 +6,21 @@ import (
 	"tetrominos/settings"
 	"tetrominos/states/gamestate"
 	t "tetrominos/tetrominos"
-	"time"
+	"tetrominos/ticker"
 )
 
 type gameState struct {
-	params    Params
-	field     gamestate.Field
-	generator gamestate.Generator
+	params      Params
+	field       gamestate.Field
+	generator   gamestate.Generator
+	tickerGroup *ticker.Group
 
 	col              int
 	row              int
-	currentTetromino t.Tetromino
+	currentTetromino *t.Tetromino
 	nextTetromino    t.Tetromino
+
+	generateNewTetrominoSignal chan struct{}
 
 	score       int
 	level       int
@@ -34,11 +37,16 @@ type gameState struct {
 
 func newGameState(params Params) *gameState {
 	gs := &gameState{
-		params:     params,
-		field:      gamestate.NewField(),
-		generator:  gamestate.Generator{},
-		stopSignal: make(chan struct{}),
-		input:      make(chan input.Input),
+		params:    params,
+		field:     gamestate.NewField(),
+		generator: gamestate.Generator{},
+
+		// buffered, to avoid issues if the state is disactivating
+		generateNewTetrominoSignal: make(chan struct{}, 1),
+
+		stopSignal:  make(chan struct{}),
+		input:       make(chan input.Input),
+		tickerGroup: ticker.NewGroup(),
 	}
 	gs.gameInputHandlers = map[input.Input]func(){
 		input.EscKey:   gs.pause,
@@ -55,21 +63,24 @@ func newGameState(params Params) *gameState {
 func (s *gameState) Activate() {
 	s.outputControlsHint()
 	if s.isPaused {
+		s.tickerGroup.Resume()
 		s.isPaused = false
 		return
 	}
-	s.params.GameView.Activate()
+	s.params.GameView.Activate(s.tickerGroup)
 	s.runControl()
 }
 
 func (s *gameState) Deactivate() {
 	s.params.GameView.Deactivate()
 	if s.isPaused {
+		s.tickerGroup.Pause()
 		return
 	}
 	close(s.stopSignal)
 	close(s.input)
 	s.wg.Wait()
+	close(s.generateNewTetrominoSignal)
 }
 
 func (s *gameState) HandleInput(in input.Input) {
@@ -108,8 +119,8 @@ func (s *gameState) runControl() {
 		defer s.wg.Done()
 		s.nextTetromino = s.generator.GetNextTetromino()
 		s.generateNewTetromino()
-		ticker := time.NewTicker(gamestate.GetLevel(0).Delay)
-		defer ticker.Stop()
+		tickID, ticker := s.tickerGroup.NewTicker(gamestate.GetLevel(0).Delay)
+		defer s.tickerGroup.DeleteTicker(tickID)
 		for {
 			select {
 			case <-s.stopSignal:
@@ -118,20 +129,22 @@ func (s *gameState) runControl() {
 				if action, ok := s.gameInputHandlers[key]; ok {
 					action()
 				}
-			case <-ticker.C:
-				if !s.isPaused && !s.moveDown() {
-					if !s.generateNewTetromino() {
-						s.params.ChangeState <- newGameOverState(s.params, s.score)
-						return
+			case <-s.generateNewTetrominoSignal:
+				if !s.generateNewTetromino() {
+					s.params.ChangeState <- newGameOverState(s.params, s.score)
+					return
+				}
+				if s.level < gamestate.MaxLevel() {
+					nextLevel := gamestate.GetLevel(s.level + 1)
+					if s.removedRows >= nextLevel.Rows {
+						s.level++
+						s.params.GameView.OutputLevel(s.level)
 					}
-					if s.level < gamestate.MaxLevel() {
-						nextLevel := gamestate.GetLevel(s.level + 1)
-						if s.removedRows >= nextLevel.Rows {
-							s.level++
-							ticker.Reset(nextLevel.Delay)
-							s.params.GameView.OutputLevel(s.level)
-						}
-					}
+				}
+				s.tickerGroup.Reset(tickID, gamestate.GetLevel(s.level).Delay)
+			case <-ticker:
+				if !s.isPaused && s.currentTetromino != nil {
+					s.moveDown()
 				}
 			}
 		}
@@ -139,52 +152,59 @@ func (s *gameState) runControl() {
 }
 
 func (s *gameState) generateNewTetromino() bool {
-	s.currentTetromino = s.nextTetromino
+	ct := s.nextTetromino
+	s.currentTetromino = &ct
 	s.col = (settings.FieldWidth - s.currentTetromino.Size()) / 2
 	s.row = 0
-	if !s.field.CanBePlaced(s.col, s.row, s.currentTetromino) {
+	if !s.field.CanBePlaced(s.col, s.row, *s.currentTetromino) {
 		return false
 	}
 	s.nextTetromino = s.generator.GetNextTetromino()
 	s.params.GameView.OutputNextTetromino(s.nextTetromino)
-	s.params.GameView.Draw(s.col, s.row, s.currentTetromino)
+	s.params.GameView.Draw(s.col, s.row, ct)
 	return true
 }
 
 func (s *gameState) moveDown() bool {
-	if s.field.CanBePlaced(s.col, s.row+1, s.currentTetromino) {
-		s.move(0, 1, s.currentTetromino)
+	if s.field.CanBePlaced(s.col, s.row+1, *s.currentTetromino) {
+		s.move(0, 1, *s.currentTetromino)
 		return true
 	}
-	removedRows, changedRows := s.field.SetTetromino(s.col, s.row, s.currentTetromino)
-	rowsCount := len(removedRows)
-	if rowsCount > 0 {
-		s.removedRows += rowsCount
-		score := gamestate.Score(rowsCount)
-		s.score += score
-		s.params.GameView.RemoveRows(removedRows, changedRows, score)
-		s.params.GameView.OutputScore(s.score)
-	}
+	removedRows, changedRows := s.field.SetTetromino(s.col, s.row, *s.currentTetromino)
+	s.currentTetromino = nil
+	s.wg.Add(1)
+	go func() {
+		s.wg.Done()
+		rowsCount := len(removedRows)
+		if rowsCount > 0 {
+			s.removedRows += rowsCount
+			score := gamestate.Score(rowsCount)
+			s.score += score
+			s.params.GameView.RemoveRows(removedRows, changedRows, score)
+			s.params.GameView.OutputScore(s.score)
+		}
+		s.generateNewTetrominoSignal <- struct{}{}
+	}()
 	return false
 }
 
 func (s *gameState) moveLeft() {
-	if s.field.CanBePlaced(s.col-1, s.row, s.currentTetromino) {
-		s.move(-1, 0, s.currentTetromino)
+	if s.field.CanBePlaced(s.col-1, s.row, *s.currentTetromino) {
+		s.move(-1, 0, *s.currentTetromino)
 	}
 }
 
 func (s *gameState) moveRight() {
-	if s.field.CanBePlaced(s.col+1, s.row, s.currentTetromino) {
-		s.move(1, 0, s.currentTetromino)
+	if s.field.CanBePlaced(s.col+1, s.row, *s.currentTetromino) {
+		s.move(1, 0, *s.currentTetromino)
 	}
 }
 
 func (s *gameState) move(dc, dr int, newT t.Tetromino) {
-	s.params.GameView.Move(s.col, s.row, s.currentTetromino, s.col+dc, s.row+dr, newT)
+	s.params.GameView.Move(s.col, s.row, *s.currentTetromino, s.col+dc, s.row+dr, newT)
 	s.col += dc
 	s.row += dr
-	s.currentTetromino = newT
+	s.currentTetromino = &newT
 }
 
 // func (s *gameState) rotateLeft() {
@@ -214,7 +234,7 @@ func (s *gameState) rotate(rotationFunc func() t.Tetromino) {
 }
 
 func (s *gameState) drop() {
-	for s.field.CanBePlaced(s.col, s.row+1, s.currentTetromino) {
+	for s.field.CanBePlaced(s.col, s.row+1, *s.currentTetromino) {
 		s.moveDown()
 	}
 }
