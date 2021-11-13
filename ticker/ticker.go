@@ -75,6 +75,7 @@ func (t *ticker) run() {
 				}
 				ticker = time.NewTicker(d)
 			case d := <-t.reset:
+				t.duration = d
 				ticker.Reset(d)
 			case <-ticker.C:
 				t.lastActionAt = *getUTCTime()

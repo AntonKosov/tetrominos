@@ -7,6 +7,7 @@ import (
 	"tetrominos/states/gamestate"
 	t "tetrominos/tetrominos"
 	"tetrominos/ticker"
+	"time"
 )
 
 type gameState struct {
@@ -21,6 +22,7 @@ type gameState struct {
 	nextTetromino    t.Tetromino
 
 	generateNewTetrominoSignal chan struct{}
+	speedUpSignal              chan struct{}
 
 	score       int
 	level       int
@@ -43,6 +45,8 @@ func newGameState(params Params) *gameState {
 
 		// buffered, to avoid issues if the state is disactivating
 		generateNewTetrominoSignal: make(chan struct{}, 1),
+		// it's buffered because the signal sent from the same goroutine
+		speedUpSignal: make(chan struct{}, 1),
 
 		stopSignal:  make(chan struct{}),
 		input:       make(chan input.Input),
@@ -81,6 +85,7 @@ func (s *gameState) Deactivate() {
 	close(s.input)
 	s.wg.Wait()
 	close(s.generateNewTetrominoSignal)
+	close(s.speedUpSignal)
 }
 
 func (s *gameState) HandleInput(in input.Input) {
@@ -119,7 +124,9 @@ func (s *gameState) runControl() {
 		defer s.wg.Done()
 		s.nextTetromino = s.generator.GetNextTetromino()
 		s.generateNewTetromino()
-		tickID, ticker := s.tickerGroup.NewTicker(gamestate.GetLevel(0).Delay)
+		speedUp := false
+		turnDelay := func() time.Duration { return gamestate.GetLevel(s.level).Delay }
+		tickID, ticker := s.tickerGroup.NewTicker(turnDelay())
 		defer s.tickerGroup.DeleteTicker(tickID)
 		for {
 			select {
@@ -129,7 +136,13 @@ func (s *gameState) runControl() {
 				if action, ok := s.gameInputHandlers[key]; ok {
 					action()
 				}
+			case <-s.speedUpSignal:
+				if !speedUp {
+					speedUp = true
+					s.tickerGroup.Reset(tickID, turnDelay()/3)
+				}
 			case <-s.generateNewTetrominoSignal:
+				speedUp = false
 				if !s.generateNewTetromino() {
 					s.params.ChangeState <- newGameOverState(s.params, s.score)
 					return
@@ -141,7 +154,7 @@ func (s *gameState) runControl() {
 						s.params.GameView.OutputLevel(s.level)
 					}
 				}
-				s.tickerGroup.Reset(tickID, gamestate.GetLevel(s.level).Delay)
+				s.tickerGroup.Reset(tickID, turnDelay())
 			case <-ticker:
 				if !s.isPaused && s.currentTetromino != nil {
 					s.moveDown()
@@ -165,10 +178,10 @@ func (s *gameState) generateNewTetromino() bool {
 	return true
 }
 
-func (s *gameState) moveDown() bool {
+func (s *gameState) moveDown() {
 	if s.field.CanBePlaced(s.col, s.row+1, *s.currentTetromino) {
 		s.move(0, 1, *s.currentTetromino)
-		return true
+		return
 	}
 	removedRows, changedRows := s.field.SetTetromino(s.col, s.row, *s.currentTetromino)
 	s.currentTetromino = nil
@@ -185,7 +198,6 @@ func (s *gameState) moveDown() bool {
 		}
 		s.generateNewTetrominoSignal <- struct{}{}
 	}()
-	return false
 }
 
 func (s *gameState) moveLeft() {
@@ -234,9 +246,7 @@ func (s *gameState) rotate(rotationFunc func() t.Tetromino) {
 }
 
 func (s *gameState) drop() {
-	for s.field.CanBePlaced(s.col, s.row+1, *s.currentTetromino) {
-		s.moveDown()
-	}
+	s.speedUpSignal <- struct{}{}
 }
 
 func (s *gameState) pause() {
