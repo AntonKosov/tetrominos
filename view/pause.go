@@ -1,45 +1,38 @@
 package view
 
 import (
-	"tetrominos/input"
-	"tetrominos/view/fonts"
+	"tetrominos/view/components"
 	"tetrominos/view/ui"
 )
 
-type pause struct {
-	canvas *ui.Canvas
-	panel  ui.Panel
-	hints  controlHints
-	text   []string
+type pauseComponentsFactory interface {
+	Canvas() *ui.Canvas
+	PauseHints() components.Hints
+	PauseMessage() components.Label
 }
 
-func newPause(canvas *ui.Canvas) pause {
-	pauseText := fonts.Generate(fonts.Small, " PAUSE ")
-	h := len(pauseText)
-	w := len(pauseText[0])
-	p := canvas.CreatePanelInTheCenter(nil, w, h, 2)
-	v := pause{
-		canvas: canvas,
-		panel:  p,
-		hints:  newControlHints(canvas),
-		text:   pauseText,
-	}
+type pause struct {
+	canvas  *ui.Canvas
+	hints   components.Hints
+	message components.Label
+}
 
-	return v
+func newPause(factory pauseComponentsFactory) pause {
+	return pause{
+		canvas:  factory.Canvas(),
+		hints:   factory.PauseHints(),
+		message: factory.PauseMessage(),
+	}
 }
 
 func (v pause) Activate() {
-	s := createFontStyle(messageBoxColor, textColor).Bold(true).Blink(true)
-	v.panel.OutputStrings(0, 0, v.text, s)
-}
-
-func (v pause) Deactivate() {
-	v.panel.Clear()
-	v.hints.clear()
+	v.message.Show()
+	v.hints.Show()
 	v.canvas.Draw()
 }
 
-func (v pause) ShowControlHints(hints []input.KeyDescription) {
-	v.hints.output(hints)
+func (v pause) Deactivate() {
+	v.message.Hide()
+	v.hints.Hide()
 	v.canvas.Draw()
 }

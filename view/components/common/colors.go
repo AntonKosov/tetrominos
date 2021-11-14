@@ -1,4 +1,4 @@
-package view
+package common
 
 import "github.com/gdamore/tcell/v2"
 

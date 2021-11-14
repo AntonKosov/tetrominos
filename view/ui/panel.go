@@ -21,11 +21,11 @@ const (
 type Panel struct {
 	canvasX int
 	canvasY int
-	layer   int
+	layer   Layer
 	width   int
 	height  int
 
-	out func(x, y int, layer int, c *Char)
+	out func(x, y int, layer Layer, c *Char)
 }
 
 func (p Panel) Output(x, y int, c *Char) {
@@ -63,6 +63,12 @@ func (p Panel) OutputHAllignedStr(y int, text string, a HAlligment, s tcell.Styl
 		panic(fmt.Sprintf("Unknown alligment: %v", a))
 	}
 	p.OutputStr(x, y, text, s)
+}
+
+func (p Panel) OutputHAllignedStrings(text []string, ha HAlligment, s tcell.Style) {
+	for i, t := range text {
+		p.OutputHAllignedStr(i, t, ha, s)
+	}
 }
 
 func (p Panel) OutputAllignedStrings(text []string, ha HAlligment, va VAlligment, s tcell.Style) {

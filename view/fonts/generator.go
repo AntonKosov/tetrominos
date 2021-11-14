@@ -6,7 +6,7 @@ func Generate(f Font, str string) []string {
 	font := fontMap[f]
 	lines := make([]strings.Builder, font.height)
 	for _, r := range str {
-		c := font.letters[r]
+		c := font.letters(r)
 		for i, cl := range c {
 			lines[i].WriteString(cl)
 		}

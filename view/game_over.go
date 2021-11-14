@@ -1,45 +1,38 @@
 package view
 
 import (
-	"tetrominos/input"
-	"tetrominos/view/fonts"
+	"tetrominos/view/components"
 	"tetrominos/view/ui"
 )
 
-type gameOver struct {
-	canvas       *ui.Canvas
-	hints        controlHints
-	panel        ui.Panel
-	gameOverText []string
+type gameOverComponentsFactory interface {
+	Canvas() *ui.Canvas
+	GameOverHints() components.Hints
+	GameOverMessage() components.Label
 }
 
-func newGameOver(canvas *ui.Canvas) gameOver {
-	gameOverText := fonts.Generate(fonts.Small, " GAME OVER ")
-	w := len(gameOverText[0])
-	c := gameOver{
-		canvas:       canvas,
-		hints:        newControlHints(canvas),
-		panel:        canvas.CreatePanelInTheCenter(nil, w, len(gameOverText), 2),
-		gameOverText: gameOverText,
+type gameOver struct {
+	canvas  *ui.Canvas
+	message components.Label
+	hints   components.Hints
+}
+
+func newGameOver(factory gameOverComponentsFactory) gameOver {
+	return gameOver{
+		canvas:  factory.Canvas(),
+		message: factory.GameOverMessage(),
+		hints:   factory.GameOverHints(),
 	}
-	return c
 }
 
 func (g gameOver) Activate() {
-	style := createFontStyle(messageBoxColor, textColor).Bold(true)
-	g.panel.OutputAllignedStrings(
-		g.gameOverText, ui.HCenterAlligment, ui.TopAlligment, style,
-	)
+	g.message.Show()
+	g.hints.Show()
 	g.canvas.Draw()
 }
 
 func (g gameOver) Deactivate() {
-	g.panel.Clear()
-	g.hints.clear()
-	g.canvas.Draw()
-}
-
-func (g gameOver) ShowControlHints(hints []input.KeyDescription) {
-	g.hints.output(hints)
+	g.message.Hide()
+	g.hints.Hide()
 	g.canvas.Draw()
 }

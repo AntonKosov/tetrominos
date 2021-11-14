@@ -20,13 +20,6 @@ func newGameOverState(params Params, score int) State {
 
 func (s *gameOverState) Activate() {
 	s.params.GameOverView.Activate()
-	s.params.GameOverView.ShowControlHints([]input.KeyDescription{
-		{
-			Key:         input.EscKey,
-			Description: "Start",
-		},
-		ctrlCDescription,
-	})
 }
 
 func (s *gameOverState) Deactivate() {

@@ -1,13 +1,20 @@
 package view
 
 import (
-	"fmt"
 	"tetrominos/input"
 	"tetrominos/states"
-	"tetrominos/view/ui"
+	"tetrominos/view/components"
+	"tetrominos/view/components/common"
 
 	"github.com/gdamore/tcell/v2"
 )
+
+type compFactory interface {
+	startComponentsFactory
+	gameComponentsFactory
+	pauseComponentsFactory
+	gameOverComponentsFactory
+}
 
 type Terminal struct {
 	StartView    states.StartView
@@ -18,7 +25,7 @@ type Terminal struct {
 	Close        func()
 }
 
-func Init() (*Terminal, error) {
+func Init(compactMode bool) (*Terminal, error) {
 	screen, err := tcell.NewScreen()
 	if err != nil {
 		return nil, err
@@ -26,25 +33,17 @@ func Init() (*Terminal, error) {
 	if err := screen.Init(); err != nil {
 		return nil, err
 	}
-	w, h := screen.Size()
-	if w < screenWidth || h < screenHeight {
-		screen.Fini()
-		return nil, fmt.Errorf(
-			"the screen size must be at least %dx%d (WxH)",
-			screenWidth, screenHeight,
-		)
+
+	screen.SetStyle(common.BackgroundStyle)
+
+	var compFactory compFactory
+	if compactMode {
+		compFactory = components.NewCompactComponentsFactory(screen)
+	} else {
+		compFactory = components.NewFullComponentsFactory(screen)
 	}
 
-	bgStyle := createFontStyle(backgroundColor, textColor)
-	screen.SetStyle(bgStyle)
-
-	originX, originY := canvasOrigin(screen)
-	canvas := ui.NewCanvas(
-		screen, originX, originY,
-		screenWidth, screenHeight, layers, bgStyle,
-	)
-
-	onResize := func() { canvas.ChangeOrigin(canvasOrigin(screen)) }
+	onResize := func() { compFactory.Canvas().MoveToCenter() }
 	ic := newInputController(screen, onResize)
 	close := func() {
 		ic.Close()
@@ -52,16 +51,11 @@ func Init() (*Terminal, error) {
 	}
 
 	return &Terminal{
-		StartView:    newStart(canvas),
-		GameView:     newGame(canvas),
-		PauseView:    newPause(canvas),
-		GameOverView: newGameOver(canvas),
+		StartView:    newStart(compFactory),
+		GameView:     newGame(compFactory),
+		PauseView:    newPause(compFactory),
+		GameOverView: newGameOver(compFactory),
 		Input:        ic.input,
 		Close:        close,
 	}, nil
-}
-
-func canvasOrigin(screen tcell.Screen) (int, int) {
-	w, h := screen.Size()
-	return (w - screenWidth) / 2, (h - screenHeight) / 2
 }

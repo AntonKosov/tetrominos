@@ -67,9 +67,9 @@ func newGameState(params Params) *gameState {
 }
 
 func (s *gameState) Activate() {
-	s.outputControlsHint()
 	if s.isPaused {
 		s.tickerGroup.Resume()
+		s.params.GameView.Resume()
 		s.isPaused = false
 		return
 	}
@@ -92,36 +92,6 @@ func (s *gameState) Deactivate() {
 
 func (s *gameState) HandleInput(in input.Input) {
 	s.input <- in
-}
-
-func (s *gameState) outputControlsHint() {
-	s.params.GameView.ShowControlHints([]input.KeyDescription{
-		{
-			Key:         input.EscKey,
-			Description: "Pause",
-		},
-		{
-			Key:         input.LeftKey,
-			Description: "Move left",
-		},
-		{
-			Key:         input.RightKey,
-			Description: "Move right",
-		},
-		{
-			Key:         input.UpKey,
-			Description: "Rotate left",
-		},
-		{
-			Key:         input.DownKey,
-			Description: "Rotate right",
-		},
-		{
-			Key:         input.Enter,
-			Description: "Drop",
-		},
-		ctrlCDescription,
-	})
 }
 
 func (s *gameState) runControl() {
