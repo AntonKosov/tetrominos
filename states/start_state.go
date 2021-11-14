@@ -18,15 +18,6 @@ func NewStartState(params Params) State {
 
 func (s *startState) Activate() {
 	s.params.StartView.Activate()
-	s.params.StartView.ShowControlHints(
-		[]input.KeyDescription{
-			{
-				Key:         input.EscKey,
-				Description: "Start",
-			},
-			ctrlCDescription,
-		},
-	)
 }
 
 func (s *startState) Deactivate() {

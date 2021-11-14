@@ -17,15 +17,6 @@ func newPauseState(params Params, gState *gameState) *pauseState {
 
 func (s *pauseState) Activate() {
 	s.params.PauseView.Activate()
-	s.params.PauseView.ShowControlHints(
-		[]input.KeyDescription{
-			{
-				Key:         input.EscKey,
-				Description: "Resume",
-			},
-			ctrlCDescription,
-		},
-	)
 }
 
 func (s *pauseState) Deactivate() {

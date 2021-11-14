@@ -1,7 +1,6 @@
 package states
 
 import (
-	"tetrominos/input"
 	"tetrominos/tetrominos"
 	"tetrominos/ticker"
 )
@@ -9,7 +8,6 @@ import (
 type StartView interface {
 	Activate()
 	Deactivate()
-	ShowControlHints(hints []input.KeyDescription)
 }
 
 type GameView interface {
@@ -21,17 +19,14 @@ type GameView interface {
 	OutputScore(s int)
 	OutputLevel(l int)
 	OutputNextTetromino(t tetrominos.Tetromino)
-	ShowControlHints(hints []input.KeyDescription)
 }
 
 type PauseView interface {
 	Activate()
 	Deactivate()
-	ShowControlHints(hints []input.KeyDescription)
 }
 
 type GameOverView interface {
 	Activate()
 	Deactivate()
-	ShowControlHints(hints []input.KeyDescription)
 }

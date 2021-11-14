@@ -4,11 +4,12 @@ type Font string
 
 type font struct {
 	height  int
-	letters map[rune][]string
+	letters func(r rune) []string
 }
 
 const (
-	Small Font = "small"
+	Small  Font = "small"
+	Native Font = "native"
 )
 
 func FontHeight(f Font) int {
@@ -21,7 +22,7 @@ func init() {
 	small := font{}
 	small.height = 4
 	// Straight: https://patorjk.com/software/taag/#p=display&f=Straight&t=SNAKE%20SCORE%200123456789
-	small.letters = map[rune][]string{
+	letters := map[rune][]string{
 		'A': {
 			`    `,
 			` /\ `,
@@ -186,5 +187,19 @@ func init() {
 		},
 	}
 
-	fontMap[Small] = small
+	fontMap[Small] = font{
+		height: 4,
+		letters: func(r rune) []string {
+			return letters[r]
+		},
+	}
+}
+
+func init() {
+	fontMap[Native] = font{
+		height: 1,
+		letters: func(r rune) []string {
+			return []string{string(r)}
+		},
+	}
 }
