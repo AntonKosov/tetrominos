@@ -177,12 +177,18 @@ func (s *gameState) moveDown() {
 }
 
 func (s *gameState) moveLeft() {
+	if s.currentTetromino == nil {
+		return
+	}
 	if s.field.CanBePlaced(s.col-1, s.row, *s.currentTetromino) {
 		s.move(-1, 0, *s.currentTetromino)
 	}
 }
 
 func (s *gameState) moveRight() {
+	if s.currentTetromino == nil {
+		return
+	}
 	if s.field.CanBePlaced(s.col+1, s.row, *s.currentTetromino) {
 		s.move(1, 0, *s.currentTetromino)
 	}
@@ -196,10 +202,16 @@ func (s *gameState) move(dc, dr int, newT t.Tetromino) {
 }
 
 func (s *gameState) rotateLeft() {
+	if s.currentTetromino == nil {
+		return
+	}
 	s.rotate(s.currentTetromino.RotateLeft)
 }
 
 func (s *gameState) rotateRight() {
+	if s.currentTetromino == nil {
+		return
+	}
 	s.rotate(s.currentTetromino.RotateRight)
 }
 
@@ -222,6 +234,9 @@ func (s *gameState) rotate(rotationFunc func() t.Tetromino) {
 }
 
 func (s *gameState) drop() {
+	if s.currentTetromino == nil {
+		return
+	}
 	s.speedUpSignal <- struct{}{}
 }
 
